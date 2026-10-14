@@ -123,13 +123,13 @@ As saídas integram-se nativamente com Amazon Athena, barreiras de controle (*ga
 Os seguintes repositórios compõem o ecossistema principal criado a partir desta base e demonstram como o template é aplicado em diferentes pilares de segurança:
 
 - [AWS Security Scripts](#) — *Link*
-- [Security Hub as Control Plane](#) — *Link*
-- [IAM & Identity as Control Plane (Inclui CIEM / Gerenciamento de Privilégios)](#) — *Link*
+- [AWS Security Hub as Control Plane](#) — *Link*
+- [AWS IAM & Identity as Control Plane (Inclui CIEM / Gerenciamento de Privilégios)](#) — *Link*
 - [AWS Governance as Control Plane](#) — *Link*
-- [Software Defined Perimeter as Control Plane](#) — *Link*
-- [PaaS & Managed Services Permissions Control Plane (CodeBuild, CodeDeploy, SageMaker, RDS)](#) — *Link*
+- [AWS Software Defined Perimeter as Control Plane](#) — *Link*
+- [AWS PaaS & Managed Services Permissions Control Plane (CodeBuild, CodeDeploy, SageMaker, RDS)](#) — *Link*
 - [AWS Network Traffic as Control Plane (Roteamento VPC, Security Groups, NACLs, portas expostas)](#) — *Link*
-- [Credentials & Exposure Monitoring Control Plane (HIBP, validação e remediação de access keys)](#) — *Link*
+- [AWS Credentials & Exposure Monitoring Control Plane (HIBP, validação e remediação de access keys)](#) — *Link*
 
 > **Nota Estratégica:** Cada repositório segue o mesmo contrato de execução (*scan* → *plan* → *remediate*), utiliza o script `test-control-plane.sh` para testes de regressão confiáveis de cada controle e gera saídas versionadas. Eles podem ser utilizados individualmente ou integrados a um ecossistema unificado de Plano de Controle de Segurança.
 
