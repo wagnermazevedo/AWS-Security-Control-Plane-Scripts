@@ -65,18 +65,20 @@ Também dá para rodar uma etapa só: `scan`, `plan`, `remediate-dry-run` ou `re
 
 O AWS CloudShell é um terminal no navegador que já vem autenticado, com a AWS CLI e o Git instalados. É o jeito mais rápido de testar a série inteira.
 
-**1. Clone ou atualize os módulos da série no `$HOME`**
+**1. Clone (ou atualize) os módulos da série no `$HOME`**
 
 ```bash
 cd ~
 for repo in $(gh repo list wagnermazevedo -L 100 --json name -q '.[].name' | grep -E '^AWS-.*Control-Plane'); do
     if [ -d "$repo/.git" ]; then
-        git -C "$repo" pull --ff-only
+        git -C "$repo" pull --ff-only          # já clonado: só atualiza
     else
-        gh repo clone "wagnermazevedo/$repo"
+        gh repo clone "wagnermazevedo/$repo"   # primeira vez: clona
     fi
 done
 ```
+
+O mesmo comando serve para a primeira vez e para atualizar depois. O `--ff-only` nunca mistura mudanças: se você alterou algum arquivo localmente, o Git avisa e não mexe naquele repositório.
 
 (Se a GitHub CLI não estiver autenticada, rode `gh auth login` antes. Ou clone só o módulo que quiser com `git clone`.)
 
@@ -89,12 +91,13 @@ chmod +x ~/AWS-Security-Control-Plane-Scripts/test-control-plane.sh
 
 **3. Teste um módulo**
 
-Cada módulo explica no próprio README como montar o laboratório dele. Por exemplo, para o Security Hub:
+Cada módulo explica no próprio README como montar o laboratório dele. Todos os comandos da série rodam a partir do `$HOME`. Por exemplo, para o Security Hub:
 
 ```bash
-cd ~/AWS-Security-Hub-Control-Plane && pip3 install --user -r requirements.txt
-python3 scripts/99_securityhub_lab_setup.py --region us-east-1
-cd ~ && ~/AWS-Security-Control-Plane-Scripts/test-control-plane.sh AWS-Security-Hub-Control-Plane dry-run
+cd ~
+pip3 install --user -r ~/AWS-Security-Hub-Control-Plane/requirements.txt
+python3 ~/AWS-Security-Hub-Control-Plane/scripts/99_securityhub_lab_setup.py --region us-east-1
+~/AWS-Security-Control-Plane-Scripts/test-control-plane.sh AWS-Security-Hub-Control-Plane dry-run
 ```
 
 ⚠️ Use sempre uma conta (ou organização) de testes. Os laboratórios criam problemas de propósito.
@@ -132,7 +135,7 @@ Essas saídas se encaixam bem em Athena, gates de CI/CD, SIEM/SOAR e trilhas de 
 |---|---|---|
 | 1 | [AWS Security Control Plane Scripts](https://github.com/wagnermazevedo/AWS-Security-Control-Plane-Scripts) | Este template: o contrato, as saídas e o orquestrador |
 | 2 | [AWS Security Hub as Control Plane](https://github.com/wagnermazevedo/AWS-Security-Hub-Control-Plane) | Security Hub como fonte da verdade e de compliance: corrigir e fechar findings |
-| 3 | [AWS Governance as Control Plane](https://github.com/wagnermazevedo/AWS-Governance-as-Control-Plane) | Organizations, SCPs e tag policies como código, com detecção de drift |
+| 3 | [AWS Governance as Control Plane](https://github.com/wagnermazevedo/AWS-Governance-as-Control-Plane) | Governança em três camadas: Control Tower, AWS Config e SCPs como código, com detecção de drift |
 | 4 | AWS Data Protection as Control Plane *(em breve)* | KMS, criptografia, S3, Macie e Secrets Manager |
 | 5 | AWS IAM & Identity as Control Plane *(em breve)* | Identidades, privilégios excessivos e CIEM |
 | 6 | AWS Credentials & Exposure Control Plane *(em breve)* | Chaves vazadas e credenciais expostas: detectar, validar e responder |
@@ -208,7 +211,7 @@ Click **Use this template**, name the repository after its security domain, impl
 |---|---|---|
 | 1 | [AWS Security Control Plane Scripts](https://github.com/wagnermazevedo/AWS-Security-Control-Plane-Scripts) | This template: contract, outputs and orchestrator |
 | 2 | [AWS Security Hub as Control Plane](https://github.com/wagnermazevedo/AWS-Security-Hub-Control-Plane) | Security Hub as the source of truth and compliance |
-| 3 | [AWS Governance as Control Plane](https://github.com/wagnermazevedo/AWS-Governance-as-Control-Plane) | Organizations, SCPs and tag policies as code |
+| 3 | [AWS Governance as Control Plane](https://github.com/wagnermazevedo/AWS-Governance-as-Control-Plane) | Governance in three layers: Control Tower, AWS Config and SCPs as code |
 | 4 | AWS Data Protection as Control Plane *(coming soon)* | KMS, encryption, S3, Macie, Secrets Manager |
 | 5 | AWS IAM & Identity as Control Plane *(coming soon)* | Identities, excessive privileges, CIEM |
 | 6 | AWS Credentials & Exposure Control Plane *(coming soon)* | Leaked keys and exposed credentials |
