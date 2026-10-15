@@ -65,12 +65,16 @@ Também dá para rodar uma etapa só: `scan`, `plan`, `remediate-dry-run` ou `re
 
 O AWS CloudShell é um terminal no navegador que já vem autenticado, com a AWS CLI e o Git instalados. É o jeito mais rápido de testar a série inteira.
 
-**1. Clone os módulos da série no `$HOME`**
+**1. Clone ou atualize os módulos da série no `$HOME`**
 
 ```bash
 cd ~
 for repo in $(gh repo list wagnermazevedo -L 100 --json name -q '.[].name' | grep -E '^AWS-.*Control-Plane'); do
-    gh repo clone "wagnermazevedo/$repo"
+    if [ -d "$repo/.git" ]; then
+        git -C "$repo" pull --ff-only
+    else
+        gh repo clone "wagnermazevedo/$repo"
+    fi
 done
 ```
 
