@@ -1,294 +1,233 @@
-# AWS Security Automation — Foundation / Bootstrap
+# AWS Security Control Plane Scripts
 
 <p align="center">
   <a href="#-português">Português</a> •
   <a href="#-english">English</a>
 </p>
 
+<p align="center">
+  <img src="docs/topologia.svg" alt="Topologia do AWS Security Control Plane" width="900">
+</p>
+
 ---
 
 ## 🇧🇷 Português
 
-Antes de escanear e corrigir problemas de segurança, há um problema mais fundamental a ser resolvido: **padronização**.
+Quem trabalha com segurança na AWS já viu isso acontecer: cada problema ganha um script, cada script tem um jeito diferente de rodar, cada um grava a saída num lugar, e depois de alguns meses ninguém sabe mais qual script faz o quê, nem se dá para confiar nele.
 
-Este repositório define uma base compartilhada para automação de segurança na AWS, fornecendo um modelo de execução consistente, saídas versionadas e uma estrutura de repositório reutilizável para scanners e scripts de remediação.
+Este repositório é o ponto de partida para resolver isso. Antes de escanear ou corrigir qualquer coisa, a gente combina **um jeito único de trabalhar**: o mesmo contrato de execução, as mesmas saídas e a mesma estrutura de pastas para todos os módulos da série.
 
-> **Importante:** Este repositório é um template do GitHub (*GitHub template*).  
-> Cada módulo de automação de segurança é criado como seu próprio repositório a partir deste template, contendo toda a estrutura de diretórios internamente.
+> Este repositório é um **template do GitHub**. Cada episódio da série **AWS Security Control Plane** é um repositório próprio, criado a partir daqui, com toda a estrutura dentro dele.
 
-Sem uma base comum, a automação de segurança torna-se rapidamente uma coleção de scripts desconectados. Este projeto transforma esses scripts em um framework coeso e auditável.
+### Por que um template?
 
-### Objetivos do Projeto
+Sem uma base comum, automação de segurança vira uma gaveta de scripts soltos. Com ela, cada módulo novo já nasce:
 
-Esta versão fundacional concentra-se em:
+- com o **mesmo contrato** de execução, então quem aprendeu um sabe usar todos;
+- com **saídas versionadas e auditáveis**, que nunca são sobrescritas;
+- pronto para crescer: várias contas, pipelines de CI/CD, consultas no Amazon Athena e remediação como código.
 
-- **Estabelecer um contrato único de execução** para todos os scripts.
-- **Produzir saídas versionadas e auditáveis** para manter um histórico imutável de eventos.
-- **Permitir a reutilização** em ambientes escaláveis:
-  - Ambientes multi-contas (*multi-account*)
-  - Pipelines de CI/CD
-  - Fluxos analíticos e relatórios no Amazon Athena
-  - Arquiteturas de Remediação como Código (*Remediation-as-Code - RaC*)
-- **Criar uma base escalável** para futuras versões de automação de segurança.
+### O contrato: scan, plan e remediate
 
-Este framework atua como a pedra fundamental definitiva para toda a série de automação.
+Todo módulo da série funciona em três etapas, cada uma com uma responsabilidade só:
 
-### Contrato de Execução (Scan / Plan / Remediate)
+1. **Scan, que só olha.** Lê o ambiente e registra o que encontrou, com evidências. Nunca altera nada.
+2. **Plan, que só decide.** Transforma o que o scan encontrou num plano de ação: o que será corrigido, o que fica para uma pessoa revisar e o que é exceção. É a sua prévia do impacto.
+3. **Remediate, que age com cuidado.** Aplica o plano. Por padrão roda em *dry-run* e só mostra o que faria. Quando você roda em modo apply, ele corrige e registra o que foi planejado e o que foi aplicado.
 
-Todos os projetos criados a partir deste template seguem um contrato previsível de três fases:
+> **A regra de ouro:** nada é corrigido sem querer. Toda execução pode (e deve) ser testada antes em dry-run.
 
-1. **Scan (Somente Leitura / Read-Only)**  
-   Produz descobertas granulares e evidências criptográficas. Nunca altera o estado ou as configurações do ambiente.
-2. **Plan (Opcional, Não Mutável / Non-Mutating)**  
-   Transforma as descobertas brutas do scanner em ações operacionais propostas, funcionando como uma pré-visualização de impacto e mudanças.
-3. **Remediate (Alteração de Estado, Controlado / State-Changing, Controlled)**  
-   Aplica as alterações de engenharia de forma explícita e oferece suporte estrito ao modo de teste (*dry-run*). Produz evidências precisas da remediação (planejado vs. aplicado).
+### O laboratório e o script 99
 
-> **Regra de Ouro:** Nenhuma remediação acontece acidentalmente — cada execução do plano de controle suporta e encoraja a validação prévia via *dry-run*.
+Para testar um controle de segurança, você precisa de algo errado para ele encontrar. Por isso todo módulo tem um script `scripts/99_*`, que monta um laboratório com problemas de propósito (os recursos ficam em `lab_insecure/`). Com o mesmo script, usando `--destroy`, você desfaz tudo no final.
 
-### Verificação Automatizada e Testes do Plano de Controle
+O ciclo completo de teste fica assim:
 
-Para garantir que cada controle de segurança se comporte exatamente como projetado, este template introduz uma camada de testes automatizados orquestrada pelo script `test-control-plane.sh`.
+1. **Monte o cenário inseguro** com o script 99.
+2. **Veja se o scan encontra** o problema e registra direito.
+3. **Confira o plano**, para garantir que a correção proposta é a que você espera, sem mexer em nada.
+4. **Corrija**: primeiro em dry-run, depois em apply, e rode o scan de novo para confirmar.
 
-Este script atua como o motor central de verificação do módulo, validando todo o ciclo de vida de cada controle de segurança em ambientes reais ou simulados por meio de uma sequência de 4 etapas:
+### O orquestrador: test-control-plane.sh
 
-1. **Provisionamento do Estado Inseguro:** Coordena com o diretório `lab_insecure/` para implantar recursos intencionalmente vulneráveis, simulando um desvio de conformidade (*drift*) ou falha de *compliance* do mundo real.
-2. **Validação da Detecção (Scan):** Aciona os scripts em `scanner/` para verificar se o plano de controle identifica a vulnerabilidade com precisão e registra as descobertas corretamente.
-3. **Avaliação da Estratégia (Plan):** Testa a fase de planejamento para garantir que a mitigação proposta esteja alinhada às suas diretrizes arquiteturais sem alterar recursos.
-4. **Aplicação e Validação da Remediação (Remediate):** Executa os scripts em `remediate/` (primeiro em modo *dry-run*, depois em modo de aplicação efetiva) e confirma se o estado vulnerável foi corrigido com sucesso.
-
-Ao executar `test-control-plane.sh`, você garante um ciclo de feedback rápido e confiável para desenvolver, testar e auditar proteções de segurança localmente antes de promovê-las aos pipelines de produção.
-
-### Implantação e Replicação via AWS CloudShell
-
-O AWS CloudShell fornece um terminal baseado em navegador, pré-autenticado e com a AWS CLI e o Git já instalados, tornando-o o ambiente ideal para replicar todo o ecossistema do plano de controle.
-
-Em vez de clonar repositórios individualmente, você pode usar a GitHub CLI (`gh`) nativa ou autenticada no CloudShell para clonar em lote todos os repositórios relacionados e executar a suíte de verificação local.
-
-#### Passo 1: Autenticar e Clonar em Lote
-Autentique sua sessão do GitHub caso necessário e execute o loop de descoberta para clonar automaticamente todos os repositórios de plano de controle correspondentes ao seu perfil de ecossistema:
+O `test-control-plane.sh` roda esse ciclo para você, em qualquer módulo da série. Ele procura os estágios `scripts/00_*` (scan), `01_*` (plan) e `02_*` (remediate), encontra o arquivo de regras em `config/`, e mascara números de conta e e-mails nas saídas antes de passar uma etapa para a outra.
 
 ```bash
-# Clona todos os planos de controle do ecossistema de uma só vez
-for repo in $(gh repo list -L 100 --json nameWithOwner -q '.[].nameWithOwner' | grep -E 'AWS|Plane'); do
-    gh repo clone "$repo"
+./test-control-plane.sh list-repos                   # lista os módulos clonados no $HOME e confere se estão completos
+./test-control-plane.sh scan-all                     # roda o scan de todos os módulos
+./test-control-plane.sh <NOME_DO_REPO> dry-run       # scan, plan e remediate em dry-run
+./test-control-plane.sh <NOME_DO_REPO> apply         # o mesmo, aplicando as correções
+```
+
+Também dá para rodar uma etapa só: `scan`, `plan`, `remediate-dry-run` ou `remediate-apply`.
+
+### Mão na massa no AWS CloudShell
+
+O AWS CloudShell é um terminal no navegador que já vem autenticado, com a AWS CLI e o Git instalados. É o jeito mais rápido de testar a série inteira.
+
+**1. Clone os módulos da série no `$HOME`**
+
+```bash
+cd ~
+for repo in $(gh repo list wagnermazevedo -L 100 --json name -q '.[].name' | grep -E '^AWS-.*Control-Plane'); do
+    gh repo clone "wagnermazevedo/$repo"
 done
 ```
 
-#### Passo 2: Acessar e Configurar o Módulo Alvo
-Acesse a pasta do plano de controle que deseja testar e conceda permissão de execução ao orquestrador principal de testes:
+(Se a GitHub CLI não estiver autenticada, rode `gh auth login` antes. Ou clone só o módulo que quiser com `git clone`.)
+
+**2. Veja o que foi encontrado**
 
 ```bash
-cd Security-Control-Plane
-chmod +x test-control-plane.sh
+chmod +x ~/AWS-Security-Control-Plane-Scripts/test-control-plane.sh
+~/AWS-Security-Control-Plane-Scripts/test-control-plane.sh list-repos
 ```
 
-#### Passo 3: Executar a Suíte de Verificação
-Execute o motor de automação de testes para implantar o laboratório, validar as métricas de detecção e realizar a remediação em modo *dry-run*:
+**3. Teste um módulo**
+
+Cada módulo explica no próprio README como montar o laboratório dele. Por exemplo, para o Security Hub:
 
 ```bash
-./test-control-plane.sh
+cd ~/AWS-Security-Hub-Control-Plane && pip3 install --user -r requirements.txt
+python3 scripts/99_securityhub_lab_setup.py --region us-east-1
+cd ~ && ~/AWS-Security-Control-Plane-Scripts/test-control-plane.sh AWS-Security-Hub-Control-Plane dry-run
 ```
 
-### Estratégia de Saídas (Outputs)
+⚠️ Use sempre uma conta (ou organização) de testes. Os laboratórios criam problemas de propósito.
 
-Todas as execuções geram saídas imutáveis com registros de data e hora (*timestamps*):
+### O que fica salvo em cada execução
 
-- **As saídas nunca são sobrescritas**, garantindo a integridade histórica.
-- **Cada sequência de execução é auditável de forma independente.**
-- **Legível por máquina por padrão**, simplificando agregações.
+Toda execução grava as saídas numa pasta nova, com data e hora no nome:
 
-Formatos recomendados:
-- **JSON:** A fonte da verdade definitiva para dados brutos de execução.
-- **CSV:** Dados estruturados ideais para ingestão analítica e consultas no Amazon Athena.
-- **Markdown:** Resumos limpos e legíveis por humanos, projetados para triagem rápida de engenharia.
+- **Nada é sobrescrito**, então o histórico fica íntegro.
+- **Cada execução pode ser auditada sozinha.**
+- **Tudo é legível por máquina**, o que facilita juntar resultados.
 
-As saídas integram-se nativamente com Amazon Athena, barreiras de controle (*gates*) de CI/CD, plataformas de SIEM/SOAR e fluxos de auditoria de engenharia.
+Os formatos:
 
-### Como Utilizar Este Template
+- **YAML:** a entrada da etapa seguinte (scan para plan, plan para remediate).
+- **JSON:** a fonte da verdade, com os dados completos.
+- **CSV:** pronto para consultar no Amazon Athena.
+- **Markdown:** um resumo para gente ler rápido.
 
-1. Clique em **Use this template** no repositório principal no GitHub.
-2. Crie um novo repositório dedicado a um domínio específico de segurança.
-3. Implemente a lógica customizada do domínio de infraestrutura sob:
-   - `scanner/`
-   - `remediate/`
-   - `lab_insecure/`
-4. Execute `./test-control-plane.sh` (localmente ou via execução em lote no AWS CloudShell) para validar as implementações de ponta a ponta.
-5. Mantenha o contrato de execução e a estrutura de saídas imutáveis preservados.
+Essas saídas se encaixam bem em Athena, gates de CI/CD, SIEM/SOAR e trilhas de auditoria.
 
-> Cada módulo permanece totalmente autocontido, enquanto todos os módulos em sua *landing zone* comportam-se de maneira consistente.
+### Como criar um módulo novo
 
-### Implementações de Referência
+1. Clique em **Use this template** aqui no GitHub.
+2. Dê ao repositório o nome do domínio de segurança que ele vai cuidar.
+3. Escreva a lógica do domínio em `scanner/`, `remediate/` e `lab_insecure/`, com os estágios `scripts/00`, `01`, `02` e o setup `scripts/99`.
+4. Rode o `test-control-plane.sh` para validar de ponta a ponta.
+5. Mantenha o contrato e o formato das saídas. É isso que faz todos os módulos conversarem entre si.
 
-Os seguintes repositórios compõem o ecossistema principal criado a partir desta base e demonstram como o template é aplicado em diferentes pilares de segurança:
+> Cada módulo é independente, mas todos se comportam do mesmo jeito.
 
-- [AWS Security Scripts](#) — *Link*
-- [AWS Security Hub as Control Plane](#) — *Link*
-- [AWS IAM & Identity as Control Plane (Inclui CIEM / Gerenciamento de Privilégios)](#) — *Link*
-- [AWS Governance as Control Plane](#) — *Link*
-- [AWS Software Defined Perimeter as Control Plane](#) — *Link*
-- [AWS PaaS & Managed Services Permissions Control Plane (CodeBuild, CodeDeploy, SageMaker, RDS)](#) — *Link*
-- [AWS Network Traffic as Control Plane (Roteamento VPC, Security Groups, NACLs, portas expostas)](#) — *Link*
-- [AWS Credentials & Exposure Monitoring Control Plane (HIBP, validação e remediação de access keys)](#) — *Link*
+### Os episódios da série
 
-> **Nota Estratégica:** Cada repositório segue o mesmo contrato de execução (*scan* → *plan* → *remediate*), utiliza o script `test-control-plane.sh` para testes de regressão confiáveis de cada controle e gera saídas versionadas. Eles podem ser utilizados individualmente ou integrados a um ecossistema unificado de Plano de Controle de Segurança.
+| Ep. | Repositório | Do que trata |
+|---|---|---|
+| 1 | [AWS Security Control Plane Scripts](https://github.com/wagnermazevedo/AWS-Security-Control-Plane-Scripts) | Este template: o contrato, as saídas e o orquestrador |
+| 2 | [AWS Security Hub as Control Plane](https://github.com/wagnermazevedo/AWS-Security-Hub-Control-Plane) | Security Hub como fonte da verdade e de compliance: corrigir e fechar findings |
+| 3 | [AWS Governance as Control Plane](https://github.com/wagnermazevedo/AWS-Governance-as-Control-Plane) | Organizations, SCPs e tag policies como código, com detecção de drift |
+| 4 | AWS Data Protection as Control Plane *(em breve)* | KMS, criptografia, S3, Macie e Secrets Manager |
+| 5 | AWS IAM & Identity as Control Plane *(em breve)* | Identidades, privilégios excessivos e CIEM |
+| 6 | AWS Credentials & Exposure Control Plane *(em breve)* | Chaves vazadas e credenciais expostas: detectar, validar e responder |
+| 7 | AWS Network & Perimeter as Control Plane *(em breve)* | Perímetro definido por software e tráfego de rede: VPCs, Security Groups, NACLs e portas expostas |
+| 8 | AWS PaaS & Managed Services Control Plane *(em breve)* | Permissões em serviços gerenciados (CodeBuild, CodeDeploy, SageMaker, RDS) |
+| 9 | AWS Logging & Detection as Control Plane *(em breve)* | CloudTrail, GuardDuty e detecção |
+| 10 | AWS Incident Response as Control Plane *(em breve)* | Resposta a incidentes e remediação automática |
+| 11 | AWS AI Agents & Shift-Left Control Plane *(em breve)* | Agentes de IA e segurança antes do deploy (final da temporada) |
+| 12 | AWS Compute & Containers as Control Plane *(em breve, bônus)* | EC2, ECS, EKS e Lambda |
 
-### Estrutura do Repositório
+Todos seguem o mesmo contrato (scan, plan e remediate), usam o `test-control-plane.sh` para testar cada controle e gravam saídas versionadas. Você pode usar um módulo sozinho ou todos juntos.
 
-Cada repositório derivado deste template possui exatamente a seguinte estrutura:
+### Onde fica cada coisa
+
+Todo repositório criado a partir deste template tem esta estrutura:
 
 ```text
-aws-security-automation-<modulo>/
-├── test-control-plane.sh  # Motor de orquestração de testes para controles de segurança
-├── scanner/               # Scripts de detecção (somente leitura)
-├── remediate/             # Scripts de remediação (suporta dry-run)
-├── lab_insecure/          # Recursos intencionalmente inseguros para testes
-├── reports/               # Relatórios consolidados e sumários
-├── outputs/               # Saídas de execução versionadas (imutáveis)
-├── lib/                   # Utilitários compartilhados (CLI, clientes AWS, gravadores, validadores)
-└── docs/                  # Documentação, diagramas de arquitetura e guias
+AWS-<Dominio>-as-Control-Plane/
+├── test-control-plane.sh  # Orquestrador de testes
+├── scripts/               # Estágios 00 (scan), 01 (plan), 02 (remediate) e 99 (laboratório)
+├── config/                # O mapa de regras: o destino de cada controle
+├── scanner/               # Detecção (só leitura)
+├── remediate/             # Correções (sempre com dry-run)
+├── lab_insecure/          # Recursos inseguros de propósito, para testar
+├── tests/                 # Testes offline
+├── reports/               # Relatórios consolidados
+├── outputs/               # Saídas de cada execução (nunca sobrescritas)
+├── lib/                   # Utilitários compartilhados (clientes AWS, gravadores de saída)
+└── docs/                  # Documentação e diagramas
 ```
 
 ---
 
 ## 🇺🇸 English
 
-Before scanning and fixing security issues, there is a more fundamental problem to solve: **standardization**.
+Anyone who works with AWS security has seen this: every problem gets a script, every script runs differently, each one writes its output somewhere else, and a few months later nobody knows which script does what, or whether it can be trusted.
 
-This repository defines a shared foundation for AWS security automation, providing a consistent execution model, versioned outputs, and a reusable repository structure for scanners and remediation scripts.
+This repository is the starting point to fix that. Before scanning or fixing anything, we agree on **one way of working**: the same execution contract, the same outputs and the same folder structure for every module in the series.
 
-> **Important:** This is a GitHub template.  
-> Each security automation module is created as its own repository using this template, and each repository contains the full directory structure inside itself.
+> This is a **GitHub template**. Each episode of the **AWS Security Control Plane** series is its own repository, created from here.
 
-Without a common foundation, security automation quickly becomes a collection of disconnected scripts. This project turns those scripts into a cohesive, auditable framework.
+### The contract: scan, plan and remediate
 
-### Project Goals
+1. **Scan only looks.** It reads the environment and records what it found, with evidence. It never changes anything.
+2. **Plan only decides.** It turns findings into an action plan: what gets fixed, what goes to a human, and what is an exception.
+3. **Remediate acts carefully.** Dry-run by default. In apply mode it fixes things and records what was planned versus applied.
 
-This foundational release focuses on:
+> **Golden rule:** nothing gets fixed by accident. Every run can (and should) be tried in dry-run first.
 
-- **Establishing a single execution contract** for all scripts.
-- **Producing versioned, auditable outputs** to maintain an immutable history of events.
-- **Enabling reuse** across scaling environments:
-  - Multi-account environments
-  - CI/CD pipelines
-  - Athena analytics and reporting workflows
-  - Remediation-as-Code (RaC) architectures
-- **Creating a scalable base** for future security automation releases.
+### The lab and the 99 script
 
-This framework serves as the definitive cornerstone for the entire automation series.
-
-### Execution Contract (Scan / Plan / Remediate)
-
-All projects created from this template follow a predictable, three-phase contract:
-
-1. **Scan (Read-Only)**  
-   Produces granular findings and cryptographic evidence. It never mutates state or environment configurations.
-2. **Plan (Optional, Non-Mutating)**  
-   Transforms raw scanner findings into proposed operational actions, acting as a preview of impact and changes.
-3. **Remediate (State-Changing, Controlled)**  
-   Applies engineering changes explicitly and strictly supports dry-run mode. Produces precise remediation evidence (planned vs. applied).
-
-> **Key Rule:** No remediation happens accidentally — every single control plane execution supports and encourages dry-run validation first.
-
-### Automated Verification & Control Plane Testing
-
-To guarantee that each security control behaves exactly as designed, this template introduces an automated testing layer driven by the `test-control-plane.sh` script.
-
-This script acts as the core verification engine for the module, validating the entire lifecycle of each security control against live or simulated environments using a 4-step sequence:
-
-1. **Deploying the Insecure State:** Coordinates with the `lab_insecure/` directory to deploy intentionally vulnerable resources, simulating a real-world drift or compliance failure.
-2. **Validating Detection (Scan):** Triggers the `scanner/` scripts to verify that the control plane accurately flags the vulnerability and logs the findings properly.
-3. **Evaluating the Strategy (Plan):** Tests the plan phase to ensure the proposed mitigation matches your architectural guardrails without mutating resources.
-4. **Applying and Verifying Remediation (Remediate):** Executes the `remediate/` scripts (first in dry-run, then in enforcement mode) and verifies that the vulnerable state has been successfully corrected.
-
-By running `test-control-plane.sh`, you ensure a reliable, rapid feedback loop for developing, testing, and auditing security guardrails locally before promoting them to production pipelines.
-
-### Deployment & Replication via AWS CloudShell
-
-AWS CloudShell provides a pre-authenticated, browser-based shell that already has the AWS CLI and Git installed, making it the ideal environment to replicate your entire control plane ecosystem.
-
-Instead of cloning repositories individually, you can use the GitHub CLI (`gh`) already built-in or authenticated inside CloudShell to replicate all related control plane repositories in batch, and then execute the local verification suite.
-
-#### Step 1: Authenticate and Clone in Batch
-Authenticate your GitHub session if required, and execute the discovery loop to automatically clone all security control plane repositories matching your ecosystem profile:
+Every module ships a `scripts/99_*` script that builds a lab with intentional problems (resources live in `lab_insecure/`) and tears it down with `--destroy`. The `test-control-plane.sh` orchestrator then runs the stages `00` (scan), `01` (plan) and `02` (remediate), masking account IDs and e-mails between stages:
 
 ```bash
-# Bulk clone all ecosystem control planes at once
-for repo in $(gh repo list -L 100 --json nameWithOwner -q '.[].nameWithOwner' | grep -E 'AWS|Plane'); do
-    gh repo clone "$repo"
-done
+./test-control-plane.sh list-repos
+./test-control-plane.sh scan-all
+./test-control-plane.sh <REPO_NAME> dry-run   # or: apply, scan, plan, remediate-dry-run, remediate-apply
 ```
 
-#### Step 2: Navigate and Configure Target Module
-Enter the specific control plane folder you intend to test and grant execution permissions to the core testing orchestrator:
+⚠️ Always use a test account (or organization).
 
-```bash
-cd Security-Control-Plane
-chmod +x test-control-plane.sh
-```
+### Outputs
 
-#### Step 3: Execute Verification Suite
-Run the test automation engine to deploy the laboratory infrastructure, validate detection metrics, and perform dry-run remediation:
+Every run writes to a new timestamped folder that is never overwritten: YAML (input to the next stage), JSON (source of truth), CSV (Amazon Athena) and Markdown (human summary).
 
-```bash
-./test-control-plane.sh
-```
+### Creating a new module
 
-### Output Strategy
+Click **Use this template**, name the repository after its security domain, implement `scanner/`, `remediate/`, `lab_insecure/` and the `scripts/00`, `01`, `02` and `99` stages, and validate it end to end with `test-control-plane.sh`.
 
-All executions generate immutable, timestamped outputs:
+### The episodes
 
-- **Outputs are never overwritten**, ensuring historical integrity.
-- **Each execution sequence is independently auditable.**
-- **Machine-readable by default** to simplify aggregation.
+| Ep. | Repository | Topic |
+|---|---|---|
+| 1 | [AWS Security Control Plane Scripts](https://github.com/wagnermazevedo/AWS-Security-Control-Plane-Scripts) | This template: contract, outputs and orchestrator |
+| 2 | [AWS Security Hub as Control Plane](https://github.com/wagnermazevedo/AWS-Security-Hub-Control-Plane) | Security Hub as the source of truth and compliance |
+| 3 | [AWS Governance as Control Plane](https://github.com/wagnermazevedo/AWS-Governance-as-Control-Plane) | Organizations, SCPs and tag policies as code |
+| 4 | AWS Data Protection as Control Plane *(coming soon)* | KMS, encryption, S3, Macie, Secrets Manager |
+| 5 | AWS IAM & Identity as Control Plane *(coming soon)* | Identities, excessive privileges, CIEM |
+| 6 | AWS Credentials & Exposure Control Plane *(coming soon)* | Leaked keys and exposed credentials |
+| 7 | AWS Network & Perimeter as Control Plane *(coming soon)* | Software-defined perimeter and network traffic |
+| 8 | AWS PaaS & Managed Services Control Plane *(coming soon)* | Managed service permissions |
+| 9 | AWS Logging & Detection as Control Plane *(coming soon)* | CloudTrail, GuardDuty and detection |
+| 10 | AWS Incident Response as Control Plane *(coming soon)* | Incident response and auto-remediation |
+| 11 | AWS AI Agents & Shift-Left Control Plane *(coming soon)* | AI agents and shift-left security (season finale) |
+| 12 | AWS Compute & Containers as Control Plane *(coming soon, bonus)* | EC2, ECS, EKS and Lambda |
 
-Recommended formats include:
-- **JSON:** The definitive source of truth for raw execution data.
-- **CSV:** Structured data optimal for analytical ingestion and Athena queries.
-- **Markdown:** Clean, human-readable summaries designed for quick engineering triage.
-
-Outputs integrate natively with Amazon Athena, CI/CD deployment gates, SIEM/SOAR platforms, and engineering audit workflows.
-
-### How This Template Is Used
-
-1. Click **Use this template** on the upstream GitHub repository.
-2. Create a new repository tailored to a specific security domain.
-3. Implement your custom infrastructure domain logic under:
-   - `scanner/`
-   - `remediate/`
-   - `lab_insecure/`
-4. Run `./test-control-plane.sh` (locally or via bulk execution in AWS CloudShell) to validate your control plane implementations end-to-end.
-5. Keep the execution contract and immutable output structure intact.
-
-> Each module remains completely self-contained, but all modules across your landing zone behave consistently.
-
-### Reference Implementations
-
-The following repositories form the core ecosystem created using this foundation and demonstrate how the template applies across distinct security pillars:
-
-- [AWS Security Scripts](#) — *Link*
-- [Security Hub as Control Plane](#) — *Link*
-- [IAM & Identity as Control Plane (Includes CIEM / Privilege Management)](#) — *Link*
-- [AWS Governance as Control Plane](#) — *Link*
-- [Software Defined Perimeter as Control Plane](#) — *Link*
-- [PaaS & Managed Services Permissions Control Plane (CodeBuild, CodeDeploy, SageMaker, RDS)](#) — *Link*
-- [AWS Network Traffic as Control Plane (VPC routing, Security Groups, NACLs, exposed ports)](#) — *Link*
-- [Credentials & Exposure Monitoring Control Plane (HIBP, access key validation & remediation)](#) — *Link*
-
-> **Strategic Note:** Each repository follows the same execution contract (*scan* → *plan* → *remediate*), leverages `test-control-plane.sh` for reliable regression testing of every control, and produces versioned outputs. They can be used independently or as part of a unified Security Control Plane ecosystem.
-
-### Repository Structure
-
-Every repository created from this template includes this exact structure inside itself:
+### Repository structure
 
 ```text
-aws-security-automation-<module>/
-├── test-control-plane.sh  # Test orchestration engine for security controls
-├── scanner/               # Detection scripts (read-only)
-├── remediate/             # Remediation scripts (supports dry-run)
+AWS-<Domain>-as-Control-Plane/
+├── test-control-plane.sh  # Test orchestrator
+├── scripts/               # Stages 00 (scan), 01 (plan), 02 (remediate) and 99 (lab)
+├── config/                # Rule map
+├── scanner/               # Detection (read-only)
+├── remediate/             # Fixes (always dry-run capable)
 ├── lab_insecure/          # Intentionally insecure resources for testing
-├── reports/               # Consolidated reports and summaries
-├── outputs/               # Versioned execution outputs (immutable)
-├── lib/                   # Shared helpers (CLI, AWS clients, writers, validators)
-└── docs/                  # Documentation, architectural diagrams, and guides
+├── tests/                 # Offline tests
+├── reports/               # Consolidated reports
+├── outputs/               # Versioned, immutable outputs
+├── lib/                   # Shared utilities
+└── docs/                  # Documentation and diagrams
 ```
