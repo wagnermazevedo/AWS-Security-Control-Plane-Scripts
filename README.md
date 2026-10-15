@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/topologia-ep01-scripts.png" alt="Topologia do AWS Security Control Plane" width="900">
+  <img src="docs/topologia.svg" alt="Topologia do AWS Security Control Plane" width="900">
 </p>
 
 ---
