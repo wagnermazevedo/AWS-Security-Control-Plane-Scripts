@@ -209,18 +209,18 @@ Click **Use this template**, name the repository after its security domain, impl
 
 | Ep. | Repository | Topic |
 |---|---|---|
-| 1 | [AWS Security Control Plane Scripts](https://github.com/wagnermazevedo/AWS-Security-Control-Plane-Scripts) | This template: contract, outputs and orchestrator |
-| 2 | [AWS Security Hub as Control Plane](https://github.com/wagnermazevedo/AWS-Security-Hub-Control-Plane) | Security Hub as the source of truth and compliance |
-| 3 | [AWS Governance as Control Plane](https://github.com/wagnermazevedo/AWS-Governance-as-Control-Plane) | Governance in three layers: Control Tower, AWS Config and SCPs as code |
-| 4 | AWS Data Protection as Control Plane *(coming soon)* | KMS, encryption, S3, Macie, Secrets Manager |
-| 5 | AWS IAM & Identity as Control Plane *(coming soon)* | Identities, excessive privileges, CIEM |
-| 6 | AWS Credentials & Exposure Control Plane *(coming soon)* | Leaked keys and exposed credentials |
-| 7 | AWS Network & Perimeter as Control Plane *(coming soon)* | Software-defined perimeter and network traffic |
-| 8 | AWS PaaS & Managed Services Control Plane *(coming soon)* | Managed service permissions |
-| 9 | AWS Logging & Detection as Control Plane *(coming soon)* | CloudTrail, GuardDuty and detection |
-| 10 | AWS Incident Response as Control Plane *(coming soon)* | Incident response and auto-remediation |
-| 11 | AWS AI Agents & Shift-Left Control Plane *(coming soon)* | AI agents and shift-left security (season finale) |
-| 12 | AWS Compute & Containers as Control Plane *(coming soon, bonus)* | EC2, ECS, EKS and Lambda |
+| 1  | [AWS Security Control Plane Scripts](https://github.com/wagnermazevedo/AWS-Security-Control-Plane-Scripts) | This template: contract, outputs and orchestrator |
+| 2  | [AWS Security Hub as Control Plane](https://github.com/wagnermazevedo/AWS-Security-Hub-Control-Plane) | Security Hub as the source of truth and compliance |
+| 3  | [AWS Governance as Control Plane](https://github.com/wagnermazevedo/AWS-Governance-as-Control-Plane) | Governance in three layers: Control Tower, AWS Config and SCPs as code |
+| 4  | [AWS Data Protection as Control Plane](https://github.com/wagnermazevedo/AWS-Data-Protection-as-Control-Plane) | KMS, encryption, S3, Macie, Secrets Manager |
+| 5  | [AWS IAM & Identity as Control Plane](https://github.com/wagnermazevedo/AWS-IAM-Identity-as-Control-Plane) | Identities, excessive privileges, CIEM |
+| 6  | [AWS Credentials & Exposure Control Plane](https://github.com/wagnermazevedo/AWS-Credential-Exposure-Control-Plane)| Leaked keys and exposed credentials |
+| 7  | [AWS Network & Perimeter as Control Plane](https://github.com/wagnermazevedo/AWS-Network-Perimeter-as-Control-Plane) | Software-defined perimeter and network traffic |
+| 8  | [AWS PaaS & Managed Services Control Plane](https://github.com/wagnermazevedo/AWS-PaaS-Managed-Services-Control-Plane) | Managed service permissions |
+| 9  | [AWS Logging & Detection as Control Plane](https://github.com/wagnermazevedo/AWS-Logging-Detection-Control-Plane)| CloudTrail, GuardDuty and detection |
+| 10 | [AWS Incident Response as Control Plane](https://github.com/wagnermazevedo/AWS-Incident-Response-Control-Plane) | Incident response and auto-remediation |
+| 11 | [AWS AI Agents & Shift-Left Control Plane](https://github.com/wagnermazevedo/AWS-AI-Agents-Shift-Left-Control-Plane) | AI agents and shift-left security (season finale) |
+| 12 | [AWS Compute & Containers as Control Plane](https://github.com/wagnermazevedo/AWS-Compute-Containers-Control-Plane) | EC2, ECS, EKS and Lambda |
 
 ### Repository structure
 
