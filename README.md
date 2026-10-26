@@ -136,15 +136,17 @@ Essas saídas se encaixam bem em Athena, gates de CI/CD, SIEM/SOAR e trilhas de 
 | 1 | [AWS Security Control Plane Scripts](https://github.com/wagnermazevedo/AWS-Security-Control-Plane-Scripts) | Este template: o contrato, as saídas e o orquestrador |
 | 2 | [AWS Security Hub as Control Plane](https://github.com/wagnermazevedo/AWS-Security-Hub-Control-Plane) | Security Hub como fonte da verdade e de compliance: corrigir e fechar findings |
 | 3 | [AWS Governance as Control Plane](https://github.com/wagnermazevedo/AWS-Governance-as-Control-Plane) | Governança em três camadas: Control Tower, AWS Config e SCPs como código, com detecção de drift |
-| 4 | AWS Data Protection as Control Plane *(em breve)* | KMS, criptografia, S3, Macie e Secrets Manager |
-| 5 | AWS IAM & Identity as Control Plane *(em breve)* | Identidades, privilégios excessivos e CIEM |
-| 6 | AWS Credentials & Exposure Control Plane *(em breve)* | Chaves vazadas e credenciais expostas: detectar, validar e responder |
-| 7 | AWS Network & Perimeter as Control Plane *(em breve)* | Perímetro definido por software e tráfego de rede: VPCs, Security Groups, NACLs e portas expostas |
-| 8 | AWS PaaS & Managed Services Control Plane *(em breve)* | Permissões em serviços gerenciados (CodeBuild, CodeDeploy, SageMaker, RDS) |
-| 9 | AWS Logging & Detection as Control Plane *(em breve)* | CloudTrail, GuardDuty e detecção |
-| 10 | AWS Incident Response as Control Plane *(em breve)* | Resposta a incidentes e remediação automática |
-| 11 | AWS AI Agents & Shift-Left Control Plane *(em breve)* | Agentes de IA e segurança antes do deploy (final da temporada) |
-| 12 | AWS Compute & Containers as Control Plane *(em breve, bônus)* | EC2, ECS, EKS e Lambda |
+| 4 | [AWS Data Protection as Control Plane](https://github.com/wagnermazevedo/AWS-Data-Protection-as-Control-Plane) | KMS, criptografia, S3, Macie e Secrets Manager |
+| 5 | [AWS IAM & Identity as Control Plane](https://github.com/wagnermazevedo/AWS-IAM-Identity-as-Control-Plane) | Identidades, privilégios excessivos e CIEM |
+| 6 | [AWS Credentials & Exposure Control Plane](https://github.com/wagnermazevedo/AWS-Credential-Exposure-Control-Plane) | Chaves vazadas e credenciais expostas: detectar, validar e responder |
+| 7 | [AWS Network & Perimeter as Control Plane](https://github.com/wagnermazevedo/AWS-Network-Perimeter-as-Control-Plane) + [Software Defined Perimeter](https://github.com/wagnermazevedo/AWS-Software-Defined-Perimeter-as-Control-Plane) | Perímetro definido por software e tráfego de rede: VPCs, Security Groups, NACLs e portas expostas |
+| 8 | [AWS PaaS & Managed Services Control Plane](https://github.com/wagnermazevedo/AWS-PaaS-Managed-Services-Control-Plane) | Permissões em serviços gerenciados (CodeBuild, CodeDeploy, SageMaker, RDS) |
+| 9 | [AWS Logging & Detection as Control Plane](https://github.com/wagnermazevedo/AWS-Logging-Detection-Control-Plane) | CloudTrail, GuardDuty e detecção |
+| 10 | [AWS Incident Response as Control Plane](https://github.com/wagnermazevedo/AWS-Incident-Response-Control-Plane) | Resposta a incidentes e remediação automática |
+| 11 | [AWS AI Agents & Shift-Left Control Plane](https://github.com/wagnermazevedo/AWS-AI-Agents-Shift-Left-Control-Plane) | Agentes de IA e segurança antes do deploy (final da temporada) |
+| 12 | [AWS Compute & Containers as Control Plane](https://github.com/wagnermazevedo/AWS-Compute-Containers-Control-Plane) *(bônus)* | EC2, ECS, EKS e Lambda |
+
+> Os repositórios são liberados semana a semana, junto com cada episódio. Se um link ainda não abrir, é porque o episódio não saiu: volta na semana que vem.
 
 Todos seguem o mesmo contrato (scan, plan e remediate), usam o `test-control-plane.sh` para testar cada controle e gravam saídas versionadas. Você pode usar um módulo sozinho ou todos juntos.
 
@@ -214,13 +216,15 @@ Click **Use this template**, name the repository after its security domain, impl
 | 3  | [AWS Governance as Control Plane](https://github.com/wagnermazevedo/AWS-Governance-as-Control-Plane) | Governance in three layers: Control Tower, AWS Config and SCPs as code |
 | 4  | [AWS Data Protection as Control Plane](https://github.com/wagnermazevedo/AWS-Data-Protection-as-Control-Plane) | KMS, encryption, S3, Macie, Secrets Manager |
 | 5  | [AWS IAM & Identity as Control Plane](https://github.com/wagnermazevedo/AWS-IAM-Identity-as-Control-Plane) | Identities, excessive privileges, CIEM |
-| 6  | [AWS Credentials & Exposure Control Plane](https://github.com/wagnermazevedo/AWS-Credential-Exposure-Control-Plane)| Leaked keys and exposed credentials |
-| 7  | [AWS Network & Perimeter as Control Plane](https://github.com/wagnermazevedo/AWS-Network-Perimeter-as-Control-Plane) | Software-defined perimeter and network traffic |
+| 6  | [AWS Credentials & Exposure Control Plane](https://github.com/wagnermazevedo/AWS-Credential-Exposure-Control-Plane) | Leaked keys and exposed credentials |
+| 7  | [AWS Network & Perimeter as Control Plane](https://github.com/wagnermazevedo/AWS-Network-Perimeter-as-Control-Plane) + [Software Defined Perimeter](https://github.com/wagnermazevedo/AWS-Software-Defined-Perimeter-as-Control-Plane) | Software-defined perimeter and network traffic |
 | 8  | [AWS PaaS & Managed Services Control Plane](https://github.com/wagnermazevedo/AWS-PaaS-Managed-Services-Control-Plane) | Managed service permissions |
-| 9  | [AWS Logging & Detection as Control Plane](https://github.com/wagnermazevedo/AWS-Logging-Detection-Control-Plane)| CloudTrail, GuardDuty and detection |
+| 9  | [AWS Logging & Detection as Control Plane](https://github.com/wagnermazevedo/AWS-Logging-Detection-Control-Plane) | CloudTrail, GuardDuty and detection |
 | 10 | [AWS Incident Response as Control Plane](https://github.com/wagnermazevedo/AWS-Incident-Response-Control-Plane) | Incident response and auto-remediation |
 | 11 | [AWS AI Agents & Shift-Left Control Plane](https://github.com/wagnermazevedo/AWS-AI-Agents-Shift-Left-Control-Plane) | AI agents and shift-left security (season finale) |
-| 12 | [AWS Compute & Containers as Control Plane](https://github.com/wagnermazevedo/AWS-Compute-Containers-Control-Plane) | EC2, ECS, EKS and Lambda |
+| 12 | [AWS Compute & Containers as Control Plane](https://github.com/wagnermazevedo/AWS-Compute-Containers-Control-Plane) *(bonus)* | EC2, ECS, EKS and Lambda |
+
+> Repositories are released week by week, along with each episode. If a link does not open yet, that episode is not out: check back next week.
 
 ### Repository structure
 
