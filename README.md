@@ -1,6 +1,6 @@
 # AWS Security Control Plane Scripts
 
-**Youtube Link: https://www.youtube.com/watch?v=7Pmv3BybkF0&t=16s
+**Youtube Link: ** https://www.youtube.com/watch?v=7Pmv3BybkF0&t=16s
 
 <p align="center">
   <a href="#-português">Português</a> •
