@@ -1,6 +1,6 @@
 # AWS Security Control Plane Scripts
 
-**Youtube Link:** &lt;[incluir UR](https://www.youtube.com/watch?v=7Pmv3BybkF0&t=16s)L&gt;f
+**Youtube Link:** &lt;[[Segurança na AWS como código: scan → plan → remediate | Security Control Plane Ep. 1](https://www.youtube.com/watch?v=7Pmv3BybkF0&t=16s)](https://www.youtube.com/watch?v=7Pmv3BybkF0&t=16s)L&gt;f
 
 <p align="center">
   <a href="#-português">Português</a> •
